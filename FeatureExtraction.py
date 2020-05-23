@@ -1,9 +1,12 @@
+import concurrent.futures
+import csv
 import glob
+from concurrent.futures import wait, ALL_COMPLETED
 
 import cv2
 import numpy as np
 
-filename = "D:\leafimages\scanning\k11-5-123.jpg"
+filename = "D:/leafimages/scanning/n21-12-123.jpg"
 filename1 = "D:\leafimages\procImages\LSheath0.png"
 
 leaf_features = []
@@ -12,47 +15,56 @@ sheath_features = []
 
 def main():
     img_dir = glob.glob("D:/leafimages/scanning/*.jpg")
-    count = 1
-    for image in img_dir:
-        class_name = image.rsplit("\\", 1)[1]
-        class_name = class_name[0]
-        class_name = class_type(class_name)
-        input_img = cv2.imread(image)
-        print("processing: ", count)
-        separate_leaf_and_sheath(input_img, class_name)
-        count += 1
 
-    print("leaf features:", leaf_features.shape)
-    print("sheath features:", sheath_features.shape)
-        # separate_leaf_and_sheath(input_img, )
-        # cv2.imshow("img_to_show", input_img)
-        # cv2.waitKey(0)
+    # count = 1
+    # for image in img_dir:
+    #     class_name = image.rsplit("\\", 1)[1]
+    #     class_name = class_name[0]
+    #     class_name = class_type(class_name)
+    #     input_img = cv2.imread(image)
+    #     print("processing: ", count)
+    #     separate_leaf_and_sheath(input_img, class_name, image)
+    #     count += 1
+    #
+    # print("leaf features", np.asarray(leaf_features).shape)
+    #
+    # print("sheath features", np.asarray(sheath_features).shape)
 
-    # Read input image
-    # inputImage = cv2.imread(filename)
-
-    # print(inputImage.shape)
-    # cv2.imshow("input image", inputImage)
+    # input_img = cv2.imread(filename)
     # cv2.waitKey(0)
+    # separate_leaf_and_sheath(input_img)
 
-    # arr_sheath, arr_leaf = separate_leaf_and_sheath(inputImage)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_features = {
+            executor.submit(separate_leaf_and_sheath, cv2.imread(image), class_type(image.rsplit("\\", 1)[1][0]),
+                            image): image for image in img_dir}
+        wait(future_to_features, timeout=None, return_when=ALL_COMPLETED)
+        # for future in concurrent.futures.as_completed(future_to_features):
+        #     img_name = future_to_features[future]
+        #     try:
+        #         ret_str = future.result()
+        #     except Exception as ex:
+        #         print("Exception Occured in:", img_name)
+        #     else:
+        #         print(ret_str)
 
-    # Begin
+    print("leaf features", np.asarray(leaf_features).shape)
+    print("sheath features", np.asarray(sheath_features).shape)
 
-    # calculateRGBmeanvalue(inputImage)
-    # roi_mean = cv2.mean(arr_sheath[2])
-    # print("roi_mean:", np.array(arr_sheath[0]).shape)  # debug
-    # print("R: ", str(arr_sheath[0][0]))  # debug
-    # print("G: ", str(arr_sheath[0][1]))  # debug
-    # print("B: ", str(arr_sheath[0][2]))  # debug
+    with (open('D:\leafimages\leaf_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        for l_feature in leaf_features:
+            writer.writerow(l_feature)
 
-    # END
-
-    # print('Sheath Array shape: ', np.array(arr_sheath).shape)  # debug
-    # print('Leaf Array shape: ', np.array(arr_leaf).shape)  # debug
+    with (open('D:\leafimages\sheath_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        for s_feature in sheath_features:
+            writer.writerow(s_feature)
 
 
-def separate_leaf_and_sheath(input_image, plant_class):
+def separate_leaf_and_sheath(input_image, plant_class=None, img_name=None):
+    print("Started", img_name)
+
     # hsv color space
     hsv_image = cv2.cvtColor(input_image, cv2.COLOR_BGR2HSV)
     # cv2.imshow('hsvimage', cv2.resize(hsv_image, (800, 600)))  # debug
@@ -64,16 +76,6 @@ def separate_leaf_and_sheath(input_image, plant_class):
     leafcolorvalues2 = np.array([70, 255, 255])  # lower bound
 
     mask_image = cv2.inRange(hsv_image, leafcolorvalues1, leafcolorvalues2)
-
-    # experiment BEGIN
-    # mask_image = cv2.threshold(mask_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]  # experiment
-    # dist_transform = cv2.distanceTransform(mask_image, cv2.DIST_L2, 5)
-    # ret, mask_image = cv2.threshold(dist_transform, 0.095*dist_transform.max(), 255, 0)
-    #
-    #
-    #
-    # mask_image = np.uint8(mask_image)
-    # experiment END
 
     # cv2.imshow('maskimage', cv2.resize(mask_image, (800, 600)))  # debug
     # cv2.imwrite("D:\leafimages\procImages\Hmaskimage.jpg", mask_image)  # debug
@@ -111,56 +113,12 @@ def separate_leaf_and_sheath(input_image, plant_class):
         contour_area = cv2.contourArea(cntr)
         if contour_area < 45000:
             continue
-        # (x, y, w, h) = cv2.boundingRect(cntrs)
-        # cv2.rectangle(inputImage, (x, y), (x+w, y+h), (0, 255, 0), 2)
-
-        # print(str(img_num) + " " + str(contour_area))  # debug
-
-        rgb_mean = rgb_mean_of_contour(input_image, cntr)  # calculating RGB mean value of the contour
-
-        #  rectangle = cv2.minAreaRect(cntr)
-        #  box = cv2.boxPoints(rectangle)
-        #  box = np.int0(box)
-        # #cv2.drawContours(input_image, [box], 0, (0, 191, 255), 5)  # debug
-        #
-        #  # to get the width and the height of the rectangle
-        #  W = rectangle[1][0]
-        #  H = rectangle[1][1]
-        #
-        #  Xs = [i[0] for i in box]
-        #  Ys = [i[1] for i in box]
-        #  x1 = min(Xs)
-        #  x2 = max(Xs)
-        #  y1 = min(Ys)
-        #  y2 = max(Ys)
-        #
-        #  rotated = False
-        #  angle = rectangle[2]
-        #
-        #  if angle < -45:
-        #      angle += 90
-        #      rotated = True
-        #
-        #  center = (int((x1 + x2) / 2), int((y1 + y2) / 2))
-        #  size = (int(multiplier * (x2 - x1)), int(multiplier * (y2 - y1)))
-        #  # cv2.circle(inputImage, center, 10, (0, 255, 0), -1)  # debug
-        #
-        #  M = cv2.getRotationMatrix2D((size[0] / 2, size[1] / 2), angle, 1.0)
-        #
-        #  cropped = cv2.getRectSubPix(input_image, size, center)
-        #  cropped = cv2.warpAffine(cropped, M, size)
-        #
-        #  cropped_width = W if not rotated else H
-        #  cropped_height = H if not rotated else W
-        #
-        # croppedRotated = cv2.getRectSubPix(cropped, (int(cropped_width * multiplier), int(cropped_height *
-        # multiplier)), (size[0] / 2, size[1] / 2))
 
         cropped_rotated_img = cropped_rotated(input_image, cntr)
 
         # classifying leaf or sheath based on average area
-        if cv2.arcLength(cntr, 0) > average_arclen:
-            #cv2.imwrite("D:\leafimages\procImages\Leaf_{}.jpg".format(img_num), cropped_rotated_img)
+        if cv2.contourArea(cntr) > average_area:
+            # cv2.imwrite("D:\leafimages\procImages\Leaf_{}.jpg".format(img_num), cropped_rotated_img)  # debug
             # arr_leaf.append(rgb_mean)
             # print(str(img_num) + " height: " + str(cropped_rotated_img.shape[0]) + " width: " + str(
             #     cropped_rotated_img.shape[1]))  # debug
@@ -194,10 +152,12 @@ def separate_leaf_and_sheath(input_image, plant_class):
             # adding the plant_class
             l_features.append(plant_class)
 
+            # print(l_features)  # debug
+
             leaf_features.append(l_features)
 
         else:
-            # cv2.imwrite("D:\leafimages\procImages\LSheath{}.jpg".format(img_num), cropped_rotated_img)
+            # cv2.imwrite("D:\leafimages\procImages\LSheath{}.jpg".format(img_num), cropped_rotated_img)  # debug
             # arr_sheath.append(rgb_mean)
             # print(str(img_num) + "height: " + str(cropped_rotated_img.shape[0]) + "width: " + str(
             #     cropped_rotated_img.shape[1]))
@@ -209,12 +169,17 @@ def separate_leaf_and_sheath(input_image, plant_class):
             s_features.append(sheath_bgr_val[2])
             s_features.append(sheath_bgr_val[1])
             s_features.append(sheath_bgr_val[0])
+            s_features.append(plant_class)
+
+            # print(s_features)  # debug
 
             sheath_features.append(s_features)
 
         img_num += 1
         # arr_toRet.append(cropped)
-
+        # str_to_ret = "completed extracting feature from: " + img_name
+        print("Completed", img_name)  # debug
+        # return str_to_ret
     # cv2.imshow('drawContours', cv2.resize(input_image, (800, 600)))  # debug
     # cv2.waitKey(0)
     # return arr_sheath, arr_leaf
@@ -326,7 +291,7 @@ def class_type(char):
     if char == "p":
         return "PHOSPHORUS"
 
-    if char == "正":
+    if char == "o":
         return "NORMAL"
 
     return ""
