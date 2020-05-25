@@ -7,10 +7,12 @@ import cv2
 import numpy as np
 
 filename = "D:/leafimages/scanning/n21-12-123.jpg"
-filename1 = "D:\leafimages\procImages\LSheath0.png"
 
 leaf_features = []
 sheath_features = []
+
+leaf_feature_names = ["LR", "LG", "LB", "LTR", "LTG", "LTB", "LA", "LL", "LALLR", "LAPR", "LI", "CLASS"]
+sheath_feature_names = ["LSR", "LSG", "LSB", "CLASS"]
 
 
 def main():
@@ -51,15 +53,25 @@ def main():
     print("leaf features", np.asarray(leaf_features).shape)
     print("sheath features", np.asarray(sheath_features).shape)
 
-    with (open('D:\leafimages\leaf_features.csv', 'w', newline='')) as file:
+    with (open('D:/leafimages/N_vs_PK_leaf_features.csv', 'w', newline='')) as file:
         writer = csv.writer(file, dialect='excel')
+        writer.writerow(leaf_feature_names)
         for l_feature in leaf_features:
-            writer.writerow(l_feature)
+            if l_feature[11] == "NITROGEN":
+                writer.writerow(l_feature)
+            if l_feature[11] == "PK":
+                writer.writerow(l_feature)
+            # writer.writerow(l_feature)
 
-    with (open('D:\leafimages\sheath_features.csv', 'w', newline='')) as file:
+    with (open('D:/leafimages/N_vs_PK_sheath_features.csv', 'w', newline='')) as file:
         writer = csv.writer(file, dialect='excel')
+        writer.writerow(sheath_feature_names)
         for s_feature in sheath_features:
-            writer.writerow(s_feature)
+            if s_feature[3] == "NITROGEN":
+                writer.writerow(s_feature)
+            if s_feature[3] == "PK":
+                writer.writerow(s_feature)
+            # writer.writerow(s_feature)
 
 
 def separate_leaf_and_sheath(input_image, plant_class=None, img_name=None):
@@ -125,13 +137,13 @@ def separate_leaf_and_sheath(input_image, plant_class=None, img_name=None):
 
             l_features = []  # single leaf features
 
-            # feature 1 Leaf R, G, B
+            # feature 1 Leaf R, G, B LR, LG, LB
             leaf_bgr_val = rgb_mean_of_contour(input_image, cntr)
             l_features.append(leaf_bgr_val[2])
             l_features.append(leaf_bgr_val[1])
             l_features.append(leaf_bgr_val[0])
 
-            # feature 2 LEAF TIP R, G, B
+            # feature 2 LEAF TIP R, G, B LTR, LTG, LTB
             height, width, channels = cropped_rotated_img.shape
             w_start = int(width * 0.8)
             leaf_tip = cropped_rotated_img[0:height, w_start: width]
@@ -140,14 +152,20 @@ def separate_leaf_and_sheath(input_image, plant_class=None, img_name=None):
             l_features.append(bgr_val[1])
             l_features.append(bgr_val[0])
 
-            # feature 3 LEAF AREA
+            # feature 3 LEAF AREA LA
             l_features.append(contour_area)
 
-            # feature 4 LEAF LENGTH
+            # feature 4 LEAF LENGTH LL
             l_features.append(width)
 
-            # feature 5 LEAF AREA LENGTH RATIO
+            # feature 5 LEAF AREA LENGTH RATIO LALLR
             l_features.append(contour_area / width)
+
+            # feature 6 LEAF AREA PERIMETER RATIO LAPR
+            l_features.append(contour_area / cv2.arcLength(cntr, closed=True))
+
+            # feature 7 LEAF LIGHTNESS LI
+            l_features.append((0.299 * leaf_bgr_val[2]) + (0.587 * leaf_bgr_val[1]) + (0.114 * leaf_bgr_val[0]))
 
             # adding the plant_class
             l_features.append(plant_class)
@@ -164,7 +182,7 @@ def separate_leaf_and_sheath(input_image, plant_class=None, img_name=None):
 
             s_features = []  # single sheath features
 
-            # feature 1
+            # feature 1 LSR, LSG, LSB
             sheath_bgr_val = rgb_mean_of_contour(input_image, cntr)
             s_features.append(sheath_bgr_val[2])
             s_features.append(sheath_bgr_val[1])
@@ -283,13 +301,13 @@ def rgb_leaf_tip(img):
 
 def class_type(char):
     if char == "k":
-        return "POTASSIUM"
+        return "PK"
 
     if char == "n":
         return "NITROGEN"
 
     if char == "p":
-        return "PHOSPHORUS"
+        return "PK"
 
     if char == "o":
         return "NORMAL"
