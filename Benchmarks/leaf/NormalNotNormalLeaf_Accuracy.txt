@@ -1,0 +1,14 @@
+0.625
+[[13  8]
+ [ 4  7]]
+              precision    recall  f1-score   support
+
+           0       0.76      0.62      0.68        21
+           1       0.47      0.64      0.54        11
+
+    accuracy                           0.62        32
+   macro avg       0.62      0.63      0.61        32
+weighted avg       0.66      0.62      0.63        32
+
+No Skill: ROC AUC=0.500
+Logistic: ROC AUC=0.714

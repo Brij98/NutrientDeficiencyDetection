@@ -9,128 +9,26 @@ import numpy as np
 
 filename = "D:/leafimages/scanning/n21-12-123.jpg"
 
-leaf_features = []
-sheath_features = []
+# leaf_features = []
+# sheath_features = []
 
 leaf_feature_names = ["LR", "LG", "LB", "LTR", "LTG", "LTB", "LA", "LL", "LALLR", "LAPR", "LI", "CLASS"]
 sheath_feature_names = ["LSR", "LSG", "LSB", "LSL" "CLASS"]
 
+Leaf_class_num = 13
+Sheath_class_num = 4
+
 
 def main():
     extract_normal_features()
-    # img_dir = glob.glob("D:/leafimages/scanning/*.jpg")
-    #
-    # with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor: future_to_features = { executor.submit(
-    # separate_leaf_and_sheath, cv2.imread(image), False, class_type(image.rsplit("\\", 1)[1][0]), image): image for
-    # image in img_dir} wait(future_to_features, timeout=None, return_when=ALL_COMPLETED)
-    #
-    # print("leaf features", np.asarray(leaf_features).shape)
-    # print("sheath features", np.asarray(sheath_features).shape)
-    #
-    # # writing to csv for leaf
-    # # normal not normal
-    # with (open('D:/leafimages/Normal_leaf_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(leaf_feature_names)
-    #     for l_feature in leaf_features:
-    #         temp = copy.deepcopy(l_feature)
-    #         if temp[11] != "NORMAL":
-    #             temp[11] = "NOT NORMAL"
-    #
-    #         if temp[11] == "NORMAL":
-    #             temp[11] = 0
-    #         else:
-    #             temp[11] = 1
-    #         writer.writerow(temp)
-    #
-    # # nitrogen and pk
-    # with (open('D:/leafimages/NPK_leaf_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(leaf_feature_names)
-    #     for l_feature in leaf_features:
-    #         temp = copy.deepcopy(l_feature)
-    #         if temp[11] != "NORMAL":
-    #             if temp[11] == "POTASSIUM":
-    #                 temp[11] = "PK"
-    #             if temp[11] == "PHOSPHORUS":
-    #                 temp[11] = "PK"
-    #
-    #             if temp[11] == "NITROGEN":
-    #                 temp[11] = 0
-    #             else:
-    #                 temp[11] = 1
-    #             writer.writerow(temp)
-    #
-    # # phosphorus and potassium
-    # with (open('D:/leafimages/PK_leaf_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(leaf_feature_names)
-    #     for l_feature in leaf_features:
-    #         temp = copy.deepcopy(l_feature)
-    #         if temp[11] == "POTASSIUM" or temp[11] == "PHOSPHORUS":
-    #             if temp[11] == "POTASSIUM":
-    #                 temp[11] = 0
-    #             else:
-    #                 temp[11] = 1
-    #             writer.writerow(temp)
-    #
-    # # leaf sheaths
-    # # normal vs not normal
-    # with (open('D:/leafimages/Normal_sheath_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(sheath_feature_names)
-    #     for s_feature in sheath_features:
-    #         temp_s = copy.deepcopy(s_feature)
-    #         if temp_s[3] != "NORMAL":
-    #             temp_s[3] = "NOT NORMAL"
-    #
-    #         if temp_s[3] == "NORMAL":
-    #             temp_s[3] = 0
-    #         else:
-    #             temp_s[3] = 1
-    #
-    #         writer.writerow(temp_s)
-    #
-    # # nitrogen vs pk
-    # with (open('D:/leafimages/NPK_sheath_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(sheath_feature_names)
-    #     for s_feature in sheath_features:
-    #         temp_s = copy.deepcopy(s_feature)
-    #         if temp_s[3] != "NORMAL":
-    #             if temp_s[3] == "POTASSIUM":
-    #                 temp_s[3] = "PK"
-    #             if temp_s[3] == "PHOSPHORUS":
-    #                 temp_s[3] = "PK"
-    #
-    #             if temp_s[3] == "NITROGEN":
-    #                 temp_s[3] = 0
-    #             else:
-    #                 temp_s[3] = 1
-    #
-    #             writer.writerow(temp_s)
-    #
-    # # potassium vs phosphorus
-    # with (open('D:/leafimages/PK_sheath_features.csv', 'w', newline='')) as file:
-    #     writer = csv.writer(file, dialect='excel')
-    #     writer.writerow(sheath_feature_names)
-    #     for s_feature in sheath_features:
-    #         temp_s = copy.deepcopy(s_feature)
-    #         if temp_s[3] == "POTASSIUM" or temp_s[3] == "PHOSPHORUS":
-    #
-    #             if temp_s[3] == "POTASSIUM":
-    #                 temp_s[3] = 0
-    #             else:
-    #                 temp_s[3] = 1
-    #             writer.writerow(temp_s)
 
 
 def extract_normal_features():
     img_dir = glob.glob("D:/leafimages/normal_training_dataset/*.jpg")
-    normal_leaf_feature_names = ["LG", "LTR", "LTG", "LA", "CLASS"]
-    normal_sheath_feature_names = ["LSR", "LSG", "LSB", "LSL", "CLASS"]
-    normal_leaf_features = []
-    normal_sheath_features = []
+    # normal_leaf_feature_names = ["LG", "LTR", "LTG", "LA", "CLASS"]
+    # normal_sheath_feature_names = ["LSR", "LSG", "LSB", "LSL", "CLASS"]
+    leaf_features = []
+    sheath_features = []
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         list_futures = {
@@ -142,50 +40,13 @@ def extract_normal_features():
             try:
                 arr_leaf, arr_sheath = future.result()
                 for l in arr_leaf:
-                    normal_leaf_features.append(l)
+                    leaf_features.append(l)
                 for s in arr_sheath:
-                    normal_sheath_features.append(s)
+                    sheath_features.append(s)
             except Exception as ex:
-                print("Exception Occured in:", img_name)
+                print("Exception Occured in:", img_name, ex)
 
-        with (open('D:/leafimages/Normal_leaf_features.csv', 'w', newline='')) as file:
-            writer = csv.writer(file, dialect='excel')
-            writer.writerow(normal_leaf_feature_names)
-            for l_feature in normal_leaf_features:
-                if l_feature[11] != "NORMAL":
-                    l_feature[11] = "NOT NORMAL"
-
-                if l_feature[11] == "NORMAL":
-                    l_feature[11] = 0
-                else:
-                    l_feature[11] = 1
-
-                writer.writerow([l_feature[1], l_feature[3], l_feature[4], l_feature[6], l_feature[11]])
-
-        with (open('D:/leafimages/Normal_sheath_features.csv', 'w', newline='')) as file:
-            writer = csv.writer(file, dialect='excel')
-            writer.writerow(normal_sheath_feature_names)
-            for s_feature in normal_sheath_feature_names:
-                if s_feature[4] != "NORMAL":
-                    s_feature[4] = "NOT NORMAL"
-
-                if s_feature[4] == "NORMAL":
-                    s_feature[4] = 0
-                else:
-                    s_feature[4] = 1
-
-                writer.writerow([s_feature[0], s_feature[1], s_feature[2], s_feature[3], s_feature[4]])
-
-
-def predict_normal_features(image):
-    l_feature, s_feature = separate_leaf_and_sheath(image, True)
-    ret_l_feature = []
-    ret_s_feature = []
-    for l in l_feature:
-        ret_l_feature.append([l[0], l[1], l[2], l[3]])
-    for s in s_feature:
-        ret_s_feature.append([s[0], s[1], s[2], s[3]])
-    return ret_l_feature, ret_s_feature
+    write_normal_leaf_sheath_features(leaf_features, sheath_features)
 
 
 def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=None):
@@ -196,8 +57,6 @@ def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=No
     # cv2.imshow('hsvimage', cv2.resize(hsv_image, (800, 600)))  # debug
     # cv2.imwrite("D:\leafimages\procImages\HSVImage.jpg", hsv_image)  # debug
 
-    # leafcolorvalues1 = np.array([10, 25, 25])  # upper bound
-    # leafcolorvalues2 = np.array([70, 255, 255])  # lower bound
     leafcolorvalues1 = np.array([0, 25, 25])  # upper bound
     leafcolorvalues2 = np.array([70, 255, 255])  # lower bound
 
@@ -212,26 +71,15 @@ def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=No
 
     # calculating average of contour width and area
     total_area = 0
-    total_width = 0
-    total_green = 0
-    total_arc_len = 0
     num_items = 0
     for cntr in contours:
         contour_area = cv2.contourArea(cntr)
         if contour_area < 45000:
             continue
-        rgb_mean = rgb_mean_of_contour(input_image, cntr)
-        cropped_rotated_img = cropped_rotated(input_image, cntr)
-        height, width, channel = cropped_rotated_img.shape
         num_items += 1
         total_area += contour_area
-        total_width += width
-        total_green += rgb_mean[1]
-        total_arc_len += cv2.arcLength(cntr, 0)
-    average_width = total_width / num_items
+
     average_area = total_area / num_items
-    average_green = total_green / num_items
-    average_arclen = total_arc_len / num_items
     # end of calculating averages
 
     ret_leaf_features = []
@@ -244,7 +92,7 @@ def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=No
 
         cropped_rotated_img = cropped_rotated(input_image, cntr)
 
-        # classifying leaf or sheath based on average area
+        # segmenting leaf or sheath based on average area
         if cv2.contourArea(cntr) > average_area:
             # cv2.imwrite("D:\leafimages\procImages\Leaf_{}.jpg".format(img_num), cropped_rotated_img)  # debug
             # arr_leaf.append(rgb_mean)
@@ -283,10 +131,17 @@ def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=No
             # feature 7 LEAF LIGHTNESS LI
             l_features.append((0.299 * leaf_bgr_val[2]) + (0.587 * leaf_bgr_val[1]) + (0.114 * leaf_bgr_val[0]))  # [10]
 
+            # feature 8 Normalized Red Index
+            nri = leaf_bgr_val[2] / (leaf_bgr_val[2] + leaf_bgr_val[1] + leaf_bgr_val[0])
+            l_features.append(nri)  # [11]
+
+            # feature 9 Normalized Green Index
+            ngi = leaf_bgr_val[1] / (leaf_bgr_val[2] + leaf_bgr_val[1] + leaf_bgr_val[0])
+            l_features.append(ngi)  # [12]
+
             # print(l_features)  # debug
-            if not predict:
-                l_features.append(plant_class)  # [11]
-                # leaf_features.append(l_features)
+            l_features.append(plant_class)  # [13]
+
             ret_leaf_features.append(l_features)
         else:
             # cv2.imwrite("D:\leafimages\procImages\LSheath{}.jpg".format(img_num), cropped_rotated_img)  # debug
@@ -303,12 +158,12 @@ def separate_leaf_and_sheath(input_image, predict, plant_class=None, img_name=No
             s_features.append(sheath_bgr_val[0])  # [2]
 
             # feature 2 Leaf Sheath Length LSL
+            height, width, channels = cropped_rotated_img.shape
             s_features.append(width)  # [3]
 
             # print(s_features)  # debug
-            if not predict:
-                s_features.append(plant_class)  # [4]
-                # sheath_features.append(s_features)
+            s_features.append(plant_class)  # [4]
+
             ret_sheath_features.append(s_features)
 
         img_num += 1
@@ -432,6 +287,125 @@ def class_type(char):
         return "NORMAL"
 
     return ""
+
+
+def write_normal_leaf_sheath_features(leaves_features, sheaths_features):
+    with (open('D:/leafimages/Normal_leaf_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LG", "LTR", "LTG", "LA", "CLASS"])
+        for l_feature in leaves_features:
+            if l_feature[Leaf_class_num] != "NORMAL":
+                l_feature[Leaf_class_num] = "NOT NORMAL"
+
+            if l_feature[Leaf_class_num] == "NORMAL":
+                l_feature[Leaf_class_num] = 0
+            else:
+                l_feature[Leaf_class_num] = 1
+
+            writer.writerow([l_feature[1], l_feature[3], l_feature[4], l_feature[6], l_feature[Leaf_class_num]])
+
+    with (open('D:/leafimages/Normal_sheath_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LSL", "LSG", "LSB", "LSL", "CLASS"])
+        for s_feature in sheaths_features:
+            if s_feature[Sheath_class_num] != "NORMAL":
+                s_feature[Sheath_class_num] = "NOT NORMAL"
+
+            if s_feature[Sheath_class_num] == "NORMAL":
+                s_feature[Sheath_class_num] = 0
+            else:
+                s_feature[Sheath_class_num] = 1
+
+            writer.writerow([s_feature[0], s_feature[1], s_feature[2], s_feature[3], s_feature[Sheath_class_num]])
+
+
+def predict_normal_features(image):
+    l_feature, s_feature = separate_leaf_and_sheath(image, True)
+    ret_l_feature = []
+    ret_s_feature = []
+    for l in l_feature:
+        ret_l_feature.append([l[1], l[3], l[4], l[6]])
+    for s in s_feature:
+        ret_s_feature.append([s[0], s[1], s[2], s[3]])
+    return ret_l_feature, ret_s_feature
+
+
+def write_npk_leaf_sheath_features(leaves_features, sheaths_features):
+    with (open('D:/leafimages/NPK_leaf_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LG", "LB", "NRI", "NGI", "CLASS"])
+        for l_feature in leaves_features:
+            if l_feature[Leaf_class_num] != "NITROGEN":
+                l_feature[Leaf_class_num] = "PK"
+
+            if l_feature[Leaf_class_num] == "NITROGEN":
+                l_feature[Leaf_class_num] = 0
+            else:
+                l_feature[Leaf_class_num] = 1
+
+            writer.writerow([l_feature[1], l_feature[2], l_feature[11], l_feature[12], l_feature[Leaf_class_num]])
+
+    with (open('D:/leafimages/NPK_sheath_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LSG", "LSB", "CLASS"])
+        for s_feature in sheaths_features:
+            if s_feature[Sheath_class_num] != "NITROGEN":
+                s_feature[Sheath_class_num] = "PK"
+
+            if s_feature[Sheath_class_num] == "NITROGEN":
+                s_feature[Sheath_class_num] = 0
+            else:
+                s_feature[Sheath_class_num] = 1
+
+            writer.writerow([s_feature[1], s_feature[2], s_feature[Sheath_class_num]])
+
+
+def predict_npk_features(image):
+    l_feature, s_feature = separate_leaf_and_sheath(image, True)
+    ret_l_feature = []
+    ret_s_feature = []
+    for l in l_feature:
+        ret_l_feature.append([l[1], l[2], l[11], l[12]])
+    for s in s_feature:
+        ret_s_feature.append([s[1], s[2]])
+    return ret_l_feature, ret_s_feature
+
+
+def write_pk_leaf_sheath_features(leaves_features, sheaths_features):
+    with (open('D:/leafimages/PK_leaf_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LG", "LTG", "LALLR", "LI", "CLASS"])
+        for l_feature in leaves_features:
+
+            if l_feature[Leaf_class_num] == "PHOSPHORUS":
+                l_feature[Leaf_class_num] = 0
+            else:
+                l_feature[Leaf_class_num] = 1
+
+            writer.writerow([l_feature[1], l_feature[4], l_feature[5], l_feature[7], l_feature[Leaf_class_num]])
+
+    with (open('D:/leafimages/PK_sheath_features.csv', 'w', newline='')) as file:
+        writer = csv.writer(file, dialect='excel')
+        writer.writerow(["LSG", "LSL" "CLASS"])
+        for s_feature in sheaths_features:
+
+            if s_feature[Sheath_class_num] == "PHOSPHORUS":
+                s_feature[Sheath_class_num] = 0
+            else:
+                s_feature[Sheath_class_num] = 1
+
+            writer.writerow([s_feature[1], s_feature[3], s_feature[Sheath_class_num]])
+
+
+def predict_pk_features(image):
+    l_feature, s_feature = separate_leaf_and_sheath(image, True)
+    ret_l_feature = []
+    ret_s_feature = []
+    for l in l_feature:
+        ret_l_feature.append([l[1], l[4], l[5], l[7]])
+    for s in s_feature:
+        ret_s_feature.append([s[1], s[3]])
+    return ret_l_feature, ret_s_feature
 
 
 if __name__ == "__main__":
